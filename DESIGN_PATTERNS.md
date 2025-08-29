@@ -1,6 +1,6 @@
 # Design Patterns
 
-This document provides a quick reference to common design patterns used in software engineering.
+This document provides a quick reference to common design patterns used in software engineering. Design patterns are reusable solutions to commonly occurring problems within a given context in software design.
 
 ## Table of Contents
 
@@ -504,3 +504,25 @@ class RemoteControl {
         command.undo();
     }
 }
+```
+
+---
+
+### When to Use What?
+
+**Creational Patterns:**
+- **Singleton**: Database connections, Logger, Configuration
+- **Factory**: When object creation logic is complex
+- **Builder**: Objects with many optional parameters
+- **Prototype**: When object creation is expensive
+
+**Structural Patterns:**
+- **Adapter**: Integrating third-party libraries
+- **Decorator**: Adding features dynamically
+- **Facade**: Simplifying complex APIs
+
+**Behavioral Patterns:**
+- **Observer**: Event handling, MVC
+- **Strategy**: Multiple algorithms for same task
+- **Template Method**: Common algorithm structure
+- **Command**: Undo/Redo, Queuing operations

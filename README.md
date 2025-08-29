@@ -33,6 +33,8 @@ A comprehensive cheat sheet to **revise** Java Low Level Design (LLD) concepts i
 
 ## Java Core Concepts for LLD
 
+This section covers the essential Java language features that are fundamental for building any application and are frequently used in LLD interviews.
+
 ### Basic Data Types
 
 | Primitive Type | Wrapper Class | Size      | Description                   |
@@ -422,6 +424,8 @@ names.stream()
 
 ## Concurrency & Multithreading
 
+A brief overview of creating and managing threads in Java, which is crucial for designing applications that can handle multiple tasks simultaneously.
+
 ### Thread Creation
 ```java
 // Method 1: Extending Thread
@@ -565,6 +569,8 @@ public class SafeCounter {
 
 ## Exception Handling
 
+Understanding how to properly handle errors and exceptional cases is a key aspect of robust software design.
+
 ### Exception Hierarchy
 ```
 Throwable
@@ -581,63 +587,78 @@ Throwable
         └── SocketException
 ```
 
-### Best Practices
-```java
-// Custom exception
-public class InsufficientFundsException extends Exception {
-    private double amount;
+### Exception Handling Best Practices
 
-    public InsufficientFundsException(double amount) {
-        super("Insufficient funds: " + amount);
-        this.amount = amount;
-    }
+- **Be specific**: Catch specific exceptions (`FileNotFoundException`) instead of generic `Exception`.
+  ```java
+  try {
+      // Code that might throw exceptions
+  } catch (FileNotFoundException e) {
+      // Handle missing file
+  } catch (IOException e) {
+      // Handle other I/O errors
+  }
+  ```
 
-    public double getAmount() {
-        return amount;
-    }
-}
+- **Don't swallow exceptions**: Avoid empty `catch` blocks. At a minimum, log the exception.
+  ```java
+  // ❌ Bad: Swallowing exception
+  try {
+      // ...
+  } catch (Exception e) {
+      // This is bad practice!
+  }
 
-// Try-with-resources
-public String readFile(String path) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-        return reader.lines()
-            .collect(Collectors.joining("\n"));
-    }
-}
+  // ✅ Good: Logging exception
+  try {
+      // ...
+  } catch (Exception e) {
+      log.error("An error occurred", e);
+  }
+  ```
 
-// Multiple catch blocks
-public void processData(String data) {
-    try {
-        int value = Integer.parseInt(data);
-        int result = 10 / value;
-        System.out.println(result);
-    } catch (NumberFormatException e) {
-        System.err.println("Invalid number format");
-    } catch (ArithmeticException e) {
-        System.err.println("Division by zero");
-    } catch (Exception e) {
-        System.err.println("Unexpected error: " + e.getMessage());
-    } finally {
-        System.out.println("Cleanup code");
-    }
-}
+- **Use `try-with-resources`**: For all resources that implement `AutoCloseable`.
+  ```java
+  try (BufferedReader reader = new BufferedReader(new FileReader("file.txt"))) {
+      // Work with the reader
+  } catch (IOException e) {
+      // Handle exception
+  }
+  ```
 
-// Rethrowing with wrapping
-public void processFile(String path) throws ProcessingException {
-    try {
-        // File processing logic
-    } catch (IOException e) {
-        throw new ProcessingException("Failed to process file", e);
-    }
-}
-```
+- **Throw exceptions with descriptive messages**:
+  ```java
+  if (amount <= 0) {
+      throw new IllegalArgumentException("Amount must be positive, but was: " + amount);
+  }
+  ```
+
+- **Use custom exceptions**: For application-specific errors.
+  ```java
+  public class InsufficientFundsException extends Exception {
+      public InsufficientFundsException(String message) {
+          super(message);
+      }
+  }
+  
+  // Throwing the custom exception
+  if (balance < withdrawalAmount) {
+      throw new InsufficientFundsException("Insufficient funds for withdrawal.");
+  }
+  ```
 
 ---
 
 ## Best Practices
 
 ### 1. Immutability
+**Create objects whose state cannot be changed after construction.** This simplifies reasoning about your code, especially in concurrent environments.
+
 ```java
+// - Class is final to prevent subclassing
+// - Fields are private and final
+// - No setter methods
+// - Defensive copies are used for mutable fields
 public final class ImmutablePerson {
     private final String name;
     private final int age;
@@ -664,6 +685,8 @@ public final class ImmutablePerson {
 ```
 
 ### 2. Equals and HashCode
+**Override `hashCode()` whenever you override `equals()` to ensure that equal objects have the same hash code.** This is critical for the correct functioning of hash-based collections like `HashMap` and `HashSet`.
+
 ```java
 public class Person {
     private String name;
@@ -687,11 +710,13 @@ public class Person {
 ```
 
 ### 3. Composition over Inheritance
+**Favor composition (HAS-A relationship) over inheritance (IS-A relationship) to build complex functionality.** It offers more flexibility and avoids the tight coupling and rigidity of deep inheritance hierarchies.
+
 ```java
-// Instead of inheritance
+// Instead of a Car "IS-A" an Engine, which is illogical
 class Car extends Engine { }  // ❌
 
-// Use composition
+// A Car "HAS-A" an Engine, which is logical and flexible
 class Car {
     private Engine engine;     // ✅
 
@@ -706,6 +731,8 @@ class Car {
 ```
 
 ### 4. Defensive Programming
+**Validate inputs and check for nulls to make your code more robust and prevent unexpected errors.**
+
 ```java
 public class BankAccount {
     private double balance;
@@ -731,8 +758,10 @@ public class BankAccount {
 ```
 
 ### 5. Resource Management
+**Always use `try-with-resources` for any object that implements `AutoCloseable` (e.g., streams, connections).** This ensures that resources are automatically and safely closed, even if exceptions occur.
+
 ```java
-// Always use try-with-resources for AutoCloseable resources
+// The FileInputStream and BufferedReader are automatically closed
 try (FileInputStream fis = new FileInputStream("file.txt");
      BufferedReader br = new BufferedReader(new InputStreamReader(fis))) {
 
@@ -761,25 +790,6 @@ try (FileInputStream fis = new FileInputStream("file.txt");
 | PriorityQueue | - | O(n) | O(log n) | O(log n) |
 
 *Amortized time complexity
-
-### When to Use What?
-
-**Creational Patterns:**
-- **Singleton**: Database connections, Logger, Configuration
-- **Factory**: When object creation logic is complex
-- **Builder**: Objects with many optional parameters
-- **Prototype**: When object creation is expensive
-
-**Structural Patterns:**
-- **Adapter**: Integrating third-party libraries
-- **Decorator**: Adding features dynamically
-- **Facade**: Simplifying complex APIs
-
-**Behavioral Patterns:**
-- **Observer**: Event handling, MVC
-- **Strategy**: Multiple algorithms for same task
-- **Template Method**: Common algorithm structure
-- **Command**: Undo/Redo, Queuing operations
 
 ---
 

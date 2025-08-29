@@ -1,6 +1,6 @@
 # Design Principles
 
-This document covers fundamental design principles that are crucial for writing clean, maintainable, and scalable code.
+This document covers fundamental design principles that are crucial for writing clean, maintainable, and scalable code. These principles provide high-level guidelines for building robust and flexible software systems.
 
 ## Table of Contents
 
