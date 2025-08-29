@@ -7,843 +7,274 @@
 
 A comprehensive cheat sheet to **revise** Java Low Level Design (LLD) concepts in **less time**. Perfect for system design interviews, code reviews, and building production-ready applications.
 
-> 🎯 Focus: Design Patterns, SOLID Principles, OOP Concepts, and Best Practices  
+> 🎯 Focus: Core Java concepts, best practices, and quick reference for LLD interviews.
 > ⭐ Leave a star if you find this helpful (contributions welcome!)
 
 ## Table of Contents
 
-1. [SOLID Principles](#solid-principles)
-2. [Design Patterns](#design-patterns)
-   - [Creational Patterns](#creational-patterns)
-   - [Structural Patterns](#structural-patterns)
-   - [Behavioral Patterns](#behavioral-patterns)
-3. [OOP Concepts](#oop-concepts)
-4. [Java Essentials for LLD](#java-essentials-for-lld)
-5. [Concurrency & Multithreading](#concurrency--multithreading)
-6. [Collections Framework](#collections-framework)
-7. [Exception Handling](#exception-handling)
-8. [Best Practices](#best-practices)
-9. [Common LLD Interview Problems](#common-lld-interview-problems)
+1. [Java Core Concepts for LLD](#java-core-concepts-for-lld)
+2. [Concurrency & Multithreading](#concurrency--multithreading)
+3. [Exception Handling](#exception-handling)
+4. [Best Practices](#best-practices)
+5. [Java Tips & Gotchas](#java-tips--gotchas)
+6. [Further Reading](#further-reading)
 
 ---
 
-## SOLID Principles
+## Further Reading
 
-### 1. Single Responsibility Principle (SRP)
-**A class should have only one reason to change**
-
-```java
-// ❌ Bad: Multiple responsibilities
-class User {
-    private String name;
-    private String email;
-
-    public void save() {
-        // Database logic
-    }
-
-    public void sendEmail() {
-        // Email logic
-    }
-}
-
-// ✅ Good: Single responsibility
-class User {
-    private String name;
-    private String email;
-    // Only user data
-}
-
-class UserRepository {
-    public void save(User user) {
-        // Database logic
-    }
-}
-
-class EmailService {
-    public void sendEmail(User user) {
-        // Email logic
-    }
-}
-```
-
-### 2. Open/Closed Principle (OCP)
-**Open for extension, closed for modification**
-
-```java
-// ❌ Bad: Modifying existing code
-class DiscountCalculator {
-    public double calculate(String type, double amount) {
-        if (type.equals("REGULAR")) return amount * 0.1;
-        if (type.equals("PREMIUM")) return amount * 0.2;
-        // Adding new type requires modification
-        return 0;
-    }
-}
-
-// ✅ Good: Extensible design
-interface DiscountStrategy {
-    double calculate(double amount);
-}
-
-class RegularDiscount implements DiscountStrategy {
-    public double calculate(double amount) {
-        return amount * 0.1;
-    }
-}
-
-class PremiumDiscount implements DiscountStrategy {
-    public double calculate(double amount) {
-        return amount * 0.2;
-    }
-}
-```
-
-### 3. Liskov Substitution Principle (LSP)
-**Derived classes must be substitutable for their base classes**
-
-```java
-// ❌ Bad: Violates LSP
-class Bird {
-    public void fly() { }
-}
-
-class Penguin extends Bird {
-    @Override
-    public void fly() {
-        throw new UnsupportedOperationException();
-    }
-}
-
-// ✅ Good: Proper abstraction
-interface Bird { }
-
-interface FlyingBird extends Bird {
-    void fly();
-}
-
-class Sparrow implements FlyingBird {
-    public void fly() { }
-}
-
-class Penguin implements Bird {
-    public void swim() { }
-}
-```
-
-### 4. Interface Segregation Principle (ISP)
-**Clients shouldn't be forced to depend on interfaces they don't use**
-
-```java
-// ❌ Bad: Fat interface
-interface Worker {
-    void work();
-    void eat();
-    void sleep();
-}
-
-// ✅ Good: Segregated interfaces
-interface Workable {
-    void work();
-}
-
-interface Eatable {
-    void eat();
-}
-
-class Human implements Workable, Eatable {
-    public void work() { }
-    public void eat() { }
-}
-
-class Robot implements Workable {
-    public void work() { }
-}
-```
-
-### 5. Dependency Inversion Principle (DIP)
-**Depend on abstractions, not concretions**
-
-```java
-// ❌ Bad: Direct dependency
-class EmailService {
-    public void send(String message) { }
-}
-
-class NotificationService {
-    private EmailService emailService = new EmailService();
-
-    public void notify(String message) {
-        emailService.send(message);
-    }
-}
-
-// ✅ Good: Dependency injection
-interface MessageService {
-    void send(String message);
-}
-
-class EmailService implements MessageService {
-    public void send(String message) { }
-}
-
-class NotificationService {
-    private MessageService messageService;
-
-    public NotificationService(MessageService service) {
-        this.messageService = service;
-    }
-
-    public void notify(String message) {
-        messageService.send(message);
-    }
-}
-```
+- **[LLD Interview Problems Examples](LLD_Interview_Problems)**
+- **[Design Principles (SOLID, OOP)](DESIGN_PRINCIPLES.md)**
+- **[Design Patterns](DESIGN_PATTERNS.md)**
+- **[Refactoring Guru](https://refactoring.guru/)**: A great resource for in-depth explanations of design patterns.
+- **[Awesome Low-Level Design](https://github.com/ashishps1/awesome-low-level-design?tab=readme-ov-file)**: A curated list of LLD interview questions and resources.
 
 ---
 
-## Design Patterns
+## Java Core Concepts for LLD
 
-### Creational Patterns
+### Basic Data Types
 
-#### 1. Singleton Pattern
-**Ensures only one instance of a class exists**
+| Primitive Type | Wrapper Class | Size      | Description                   |
+|----------------|---------------|-----------|-------------------------------|
+| `byte`         | `Byte`        | 1 byte    | Signed integer                |
+| `short`        | `Short`       | 2 bytes   | Signed integer                |
+| `int`          | `Integer`     | 4 bytes   | Signed integer                |
+| `long`         | `Long`        | 8 bytes   | Signed integer                |
+| `float`        | `Float`       | 4 bytes   | Single-precision float        |
+| `double`       | `Double`      | 8 bytes   | Double-precision float        |
+| `char`         | `Character`   | 2 bytes   | Unicode character             |
+| `boolean`      | `Boolean`     | 1 bit     | `true` or `false`             |
+
+### String Operations
 
 ```java
-// Thread-safe Singleton with lazy initialization
-public class DatabaseConnection {
-    private static volatile DatabaseConnection instance;
+String s = "hello world";
 
-    private DatabaseConnection() {
-        // Private constructor
-    }
+// Essential Methods
+s.length();            // 11
+s.substring(0, 5);     // "hello"
+s.charAt(0);           // 'h'
+s.indexOf("world");    // 6
+s.startsWith("hello"); // true
+s.endsWith("world");   // true
+s.toUpperCase();       // "HELLO WORLD"
+s.toLowerCase();       // "hello world"
+s.trim();              // Removes leading/trailing whitespace
+s.replace('l', 'p');   // "heppo worpd"
+s.split(" ");          // ["hello", "world"]
+String.join("-", "a", "b", "c"); // "a-b-c"
 
-    public static DatabaseConnection getInstance() {
-        if (instance == null) {
-            synchronized (DatabaseConnection.class) {
-                if (instance == null) {
-                    instance = new DatabaseConnection();
-                }
-            }
-        }
-        return instance;
-    }
-}
-
-// Enum Singleton (Recommended)
-public enum DatabaseConnectionEnum {
-    INSTANCE;
-
-    public void connect() {
-        // Connection logic
-    }
-}
+// StringBuilder for efficient concatenation
+StringBuilder sb = new StringBuilder();
+sb.append("Hello, ");
+sb.append("world!");
+String result = sb.toString(); // "Hello, world!"
 ```
 
-#### 2. Factory Pattern
-**Creates objects without specifying exact classes**
+### Collections Framework
 
-```java
-// Product interface
-interface Vehicle {
-    void drive();
-}
+#### Collection Hierarchy
+```
+Collection
+├── List
+│   ├── ArrayList       // Dynamic array, O(1) access
+│   ├── LinkedList      // Doubly-linked list, O(1) add/remove at ends
+│   └── Vector          // Synchronized ArrayList (legacy)
+├── Set
+│   ├── HashSet         // No order, O(1) operations
+│   ├── LinkedHashSet   // Maintains insertion order
+│   └── TreeSet         // Sorted, O(log n) operations
+└── Queue
+    ├── PriorityQueue   // Heap-based priority queue
+    ├── ArrayDeque      // Resizable array deque
+    └── LinkedList      // Also implements Queue
 
-// Concrete products
-class Car implements Vehicle {
-    public void drive() {
-        System.out.println("Driving a car");
-    }
-}
-
-class Bike implements Vehicle {
-    public void drive() {
-        System.out.println("Riding a bike");
-    }
-}
-
-// Factory
-class VehicleFactory {
-    public static Vehicle createVehicle(String type) {
-        switch (type.toLowerCase()) {
-            case "car":
-                return new Car();
-            case "bike":
-                return new Bike();
-            default:
-                throw new IllegalArgumentException("Unknown vehicle type");
-        }
-    }
-}
-
-// Usage
-Vehicle vehicle = VehicleFactory.createVehicle("car");
-vehicle.drive();
+Map (separate hierarchy)
+├── HashMap             // No order, O(1) operations
+├── LinkedHashMap       // Maintains insertion order
+├── TreeMap             // Sorted by keys, O(log n)
+└── Hashtable          // Synchronized HashMap (legacy)
 ```
 
-#### 3. Builder Pattern
-**Constructs complex objects step by step**
-
+#### Common Operations
 ```java
-public class User {
-    private final String firstName;  // Required
-    private final String lastName;   // Required
-    private final int age;          // Optional
-    private final String phone;     // Optional
-    private final String address;   // Optional
+// List operations
+List<String> list = new ArrayList<>();
+list.add("item");                    // O(1) amortized
+list.add(0, "first");                // O(n)
+list.get(0);                         // O(1)
+list.remove(0);                      // O(n)
+list.contains("item");               // O(n)
+Collections.sort(list);              // O(n log n)
 
-    private User(UserBuilder builder) {
-        this.firstName = builder.firstName;
-        this.lastName = builder.lastName;
-        this.age = builder.age;
-        this.phone = builder.phone;
-        this.address = builder.address;
-    }
+// Set operations
+Set<String> set = new HashSet<>();
+set.add("item");                     // O(1)
+set.remove("item");                  // O(1)
+set.contains("item");                // O(1)
 
-    public static class UserBuilder {
-        private final String firstName;
-        private final String lastName;
-        private int age;
-        private String phone;
-        private String address;
+// Map operations
+Map<String, Integer> map = new HashMap<>();
+map.put("key", 1);                   // O(1)
+map.get("key");                      // O(1)
+map.remove("key");                   // O(1)
+map.containsKey("key");              // O(1)
+map.getOrDefault("key", 0);          // O(1)
+map.putIfAbsent("key", 1);           // O(1)
 
-        public UserBuilder(String firstName, String lastName) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
+// Queue operations
+Queue<String> queue = new LinkedList<>();
+queue.offer("item");                 // O(1)
+queue.poll();                        // O(1)
+queue.peek();                        // O(1)
 
-        public UserBuilder age(int age) {
-            this.age = age;
-            return this;
-        }
+// Deque operations
+Deque<String> deque = new ArrayDeque<>();
+deque.addFirst("first");             // O(1)
+deque.addLast("last");               // O(1)
+deque.removeFirst();                 // O(1)
+deque.removeLast();                  // O(1)
 
-        public UserBuilder phone(String phone) {
-            this.phone = phone;
-            return this;
-        }
+// PriorityQueue operations (Min-Heap by default)
+Queue<Integer> minHeap = new PriorityQueue<>();
+minHeap.add(3);                      // O(log n)
+minHeap.add(1);
+minHeap.peek();                      // O(1) -> 1
+minHeap.poll();                      // O(log n) -> 1
 
-        public UserBuilder address(String address) {
-            this.address = address;
-            return this;
-        }
-
-        public User build() {
-            return new User(this);
-        }
-    }
-}
-
-// Usage
-User user = new User.UserBuilder("John", "Doe")
-    .age(30)
-    .phone("123-456-7890")
-    .build();
+// Max-Heap implementation
+Queue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+maxHeap.add(1);
+maxHeap.add(3);
+maxHeap.peek();                      // O(1) -> 3
+maxHeap.poll();                      // O(log n) -> 3
 ```
 
-#### 4. Prototype Pattern
-**Creates objects by cloning existing instances**
+### Custom Sorting
+
+#### Using `Comparator`
+For custom sorting logic, especially for classes you don't own or for multiple sorting strategies.
 
 ```java
-public abstract class Shape implements Cloneable {
-    protected String type;
+class Player {
+    String name;
+    int score;
+    // constructor, getters
+}
 
-    public abstract void draw();
+// Sort by score descending, then by name ascending
+Comparator<Player> scoreComparator = (p1, p2) -> {
+    if (p1.getScore() != p2.getScore()) {
+        return Integer.compare(p2.getScore(), p1.getScore()); // Descending score
+    }
+    return p1.getName().compareTo(p2.getName()); // Ascending name
+};
+
+List<Player> players = new ArrayList<>();
+// ... add players
+players.sort(scoreComparator);
+
+// Or with a PriorityQueue
+PriorityQueue<Player> playerQueue = new PriorityQueue<>(scoreComparator);
+```
+
+#### Using `Comparable`
+For defining a natural ordering for a class.
+
+```java
+class Student implements Comparable<Student> {
+    String name;
+    int id;
 
     @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            return null;
+    public int compareTo(Student other) {
+        return Integer.compare(this.id, other.id); // Natural ordering by ID
+    }
+}
+
+List<Student> students = new ArrayList<>();
+// ... add students
+Collections.sort(students); // Sorts by ID
+```
+
+### Math Essentials
+
+```java
+// Common Math functions
+Math.max(10, 20);       // 20
+Math.min(10, 20);       // 10
+Math.abs(-5);           // 5
+Math.pow(2, 3);         // 8.0
+Math.sqrt(16);          // 4.0
+Math.ceil(2.3);         // 3.0
+Math.floor(2.3);        // 2.0
+Math.round(2.7);        // 3
+```
+
+### Useful Utility Methods
+
+```java
+// Arrays utility
+int[] arr = {3, 1, 4, 1, 5};
+Arrays.sort(arr);                       // Sorts in-place
+int index = Arrays.binarySearch(arr, 4); // 3 (index of 4)
+int[] copy = Arrays.copyOf(arr, 3);      // [1, 1, 3]
+
+// Collections utility
+List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 4));
+Collections.sort(list);                 // Sorts in-place
+Collections.reverse(list);              // Reverses in-place
+Collections.shuffle(list);              // Shuffles in-place
+int max = Collections.max(list);        // 4
+```
+
+### Binary Search
+
+```java
+// For arrays (must be sorted)
+int[] sortedArr = {1, 2, 4, 7, 9};
+int index = Arrays.binarySearch(sortedArr, 4); // 2
+int insertionPoint = Arrays.binarySearch(sortedArr, 3); // -3 (-(insertion point) - 1)
+
+// For lists (must be sorted)
+List<Integer> sortedList = Arrays.asList(1, 2, 4, 7, 9);
+int listIndex = Collections.binarySearch(sortedList, 7); // 3
+```
+
+### Taking Multiple Inputs (Scanner)
+
+```java
+import java.util.Scanner;
+
+public class InputReader {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Read a single integer
+        int n = sc.nextInt();
+
+        // Read two integers
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+
+        // Read a string
+        String s = sc.next();
+
+        // Read a full line
+        sc.nextLine(); // Consume the newline character
+        String line = sc.nextLine();
+
+        // Read an array of integers
+        int[] arr = new int[n];
+        for (int i = 0; i < n; i++) {
+            arr[i] = sc.nextInt();
         }
-    }
-}
-
-class Circle extends Shape {
-    public Circle() {
-        type = "Circle";
-    }
-
-    public void draw() {
-        System.out.println("Drawing Circle");
-    }
-}
-
-// Usage
-Circle original = new Circle();
-Circle cloned = (Circle) original.clone();
-```
-
-### Structural Patterns
-
-#### 1. Adapter Pattern
-**Allows incompatible interfaces to work together**
-
-```java
-// Target interface
-interface MediaPlayer {
-    void play(String filename);
-}
-
-// Adaptee
-class Mp3Player {
-    public void playMp3(String filename) {
-        System.out.println("Playing mp3: " + filename);
-    }
-}
-
-// Adapter
-class MediaAdapter implements MediaPlayer {
-    private Mp3Player mp3Player;
-
-    public MediaAdapter() {
-        this.mp3Player = new Mp3Player();
-    }
-
-    public void play(String filename) {
-        mp3Player.playMp3(filename);
+        
+        sc.close();
     }
 }
 ```
-
-#### 2. Decorator Pattern
-**Adds new functionality to objects dynamically**
-
-```java
-// Component
-interface Coffee {
-    double getCost();
-    String getDescription();
-}
-
-// Concrete Component
-class SimpleCoffee implements Coffee {
-    public double getCost() {
-        return 2.0;
-    }
-
-    public String getDescription() {
-        return "Simple Coffee";
-    }
-}
-
-// Decorator
-abstract class CoffeeDecorator implements Coffee {
-    protected Coffee coffee;
-
-    public CoffeeDecorator(Coffee coffee) {
-        this.coffee = coffee;
-    }
-}
-
-// Concrete Decorators
-class MilkDecorator extends CoffeeDecorator {
-    public MilkDecorator(Coffee coffee) {
-        super(coffee);
-    }
-
-    public double getCost() {
-        return coffee.getCost() + 0.5;
-    }
-
-    public String getDescription() {
-        return coffee.getDescription() + ", Milk";
-    }
-}
-
-// Usage
-Coffee coffee = new MilkDecorator(new SimpleCoffee());
-System.out.println(coffee.getDescription() + " $" + coffee.getCost());
-```
-
-#### 3. Facade Pattern
-**Provides simplified interface to complex subsystem**
-
-```java
-// Complex subsystem
-class CPU {
-    public void start() { }
-    public void execute() { }
-    public void shutdown() { }
-}
-
-class Memory {
-    public void load() { }
-    public void clear() { }
-}
-
-class HardDrive {
-    public void read() { }
-    public void write() { }
-}
-
-// Facade
-class ComputerFacade {
-    private CPU cpu;
-    private Memory memory;
-    private HardDrive hardDrive;
-
-    public ComputerFacade() {
-        this.cpu = new CPU();
-        this.memory = new Memory();
-        this.hardDrive = new HardDrive();
-    }
-
-    public void start() {
-        cpu.start();
-        memory.load();
-        hardDrive.read();
-        cpu.execute();
-    }
-
-    public void shutdown() {
-        cpu.shutdown();
-        memory.clear();
-    }
-}
-```
-
-### Behavioral Patterns
-
-#### 1. Observer Pattern
-**Defines one-to-many dependency between objects**
-
-```java
-// Subject
-interface Subject {
-    void attach(Observer observer);
-    void detach(Observer observer);
-    void notifyObservers();
-}
-
-// Observer
-interface Observer {
-    void update(String message);
-}
-
-// Concrete Subject
-class NewsAgency implements Subject {
-    private List<Observer> observers = new ArrayList<>();
-    private String news;
-
-    public void attach(Observer observer) {
-        observers.add(observer);
-    }
-
-    public void detach(Observer observer) {
-        observers.remove(observer);
-    }
-
-    public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update(news);
-        }
-    }
-
-    public void setNews(String news) {
-        this.news = news;
-        notifyObservers();
-    }
-}
-
-// Concrete Observer
-class NewsChannel implements Observer {
-    private String name;
-
-    public NewsChannel(String name) {
-        this.name = name;
-    }
-
-    public void update(String news) {
-        System.out.println(name + " received: " + news);
-    }
-}
-```
-
-#### 2. Strategy Pattern
-**Defines family of algorithms and makes them interchangeable**
-
-```java
-// Strategy interface
-interface PaymentStrategy {
-    void pay(double amount);
-}
-
-// Concrete strategies
-class CreditCardPayment implements PaymentStrategy {
-    private String cardNumber;
-
-    public CreditCardPayment(String cardNumber) {
-        this.cardNumber = cardNumber;
-    }
-
-    public void pay(double amount) {
-        System.out.println("Paid $" + amount + " using Credit Card");
-    }
-}
-
-class PayPalPayment implements PaymentStrategy {
-    private String email;
-
-    public PayPalPayment(String email) {
-        this.email = email;
-    }
-
-    public void pay(double amount) {
-        System.out.println("Paid $" + amount + " using PayPal");
-    }
-}
-
-// Context
-class ShoppingCart {
-    private PaymentStrategy paymentStrategy;
-
-    public void setPaymentStrategy(PaymentStrategy strategy) {
-        this.paymentStrategy = strategy;
-    }
-
-    public void checkout(double amount) {
-        paymentStrategy.pay(amount);
-    }
-}
-```
-
-#### 3. Template Method Pattern
-**Defines skeleton of algorithm in base class**
-
-```java
-abstract class DataProcessor {
-    // Template method
-    public final void process() {
-        readData();
-        processData();
-        saveData();
-    }
-
-    abstract void readData();
-    abstract void processData();
-
-    // Hook method (optional override)
-    void saveData() {
-        System.out.println("Saving to default storage");
-    }
-}
-
-class CSVDataProcessor extends DataProcessor {
-    void readData() {
-        System.out.println("Reading CSV file");
-    }
-
-    void processData() {
-        System.out.println("Processing CSV data");
-    }
-}
-```
-
-#### 4. Command Pattern
-**Encapsulates requests as objects**
-
-```java
-// Command interface
-interface Command {
-    void execute();
-    void undo();
-}
-
-// Receiver
-class Light {
-    public void on() {
-        System.out.println("Light is ON");
-    }
-
-    public void off() {
-        System.out.println("Light is OFF");
-    }
-}
-
-// Concrete Commands
-class LightOnCommand implements Command {
-    private Light light;
-
-    public LightOnCommand(Light light) {
-        this.light = light;
-    }
-
-    public void execute() {
-        light.on();
-    }
-
-    public void undo() {
-        light.off();
-    }
-}
-
-// Invoker
-class RemoteControl {
-    private Command command;
-
-    public void setCommand(Command command) {
-        this.command = command;
-    }
-
-    public void pressButton() {
-        command.execute();
-    }
-
-    public void pressUndo() {
-        command.undo();
-    }
-}
-```
-
----
-
-## OOP Concepts
-
-### Encapsulation
-```java
-public class BankAccount {
-    private double balance;  // Private field
-
-    // Public methods to access/modify
-    public double getBalance() {
-        return balance;
-    }
-
-    public void deposit(double amount) {
-        if (amount > 0) {
-            balance += amount;
-        }
-    }
-
-    public boolean withdraw(double amount) {
-        if (amount > 0 && amount <= balance) {
-            balance -= amount;
-            return true;
-        }
-        return false;
-    }
-}
-```
-
-### Inheritance
-```java
-// Base class
-public class Vehicle {
-    protected String brand;
-    protected int year;
-
-    public void start() {
-        System.out.println("Vehicle starting");
-    }
-}
-
-// Derived class
-public class Car extends Vehicle {
-    private int numberOfDoors;
-
-    @Override
-    public void start() {
-        System.out.println("Car starting with key");
-    }
-
-    public void honk() {
-        System.out.println("Beep beep!");
-    }
-}
-```
-
-### Polymorphism
-```java
-// Compile-time (Method Overloading)
-class Calculator {
-    public int add(int a, int b) {
-        return a + b;
-    }
-
-    public double add(double a, double b) {
-        return a + b;
-    }
-
-    public int add(int a, int b, int c) {
-        return a + b + c;
-    }
-}
-
-// Runtime (Method Overriding)
-interface Shape {
-    double area();
-}
-
-class Circle implements Shape {
-    private double radius;
-
-    public Circle(double radius) {
-        this.radius = radius;
-    }
-
-    @Override
-    public double area() {
-        return Math.PI * radius * radius;
-    }
-}
-
-class Rectangle implements Shape {
-    private double width, height;
-
-    public Rectangle(double width, double height) {
-        this.width = width;
-        this.height = height;
-    }
-
-    @Override
-    public double area() {
-        return width * height;
-    }
-}
-```
-
-### Abstraction
-```java
-// Abstract class
-public abstract class Employee {
-    protected String name;
-    protected double baseSalary;
-
-    public Employee(String name, double baseSalary) {
-        this.name = name;
-        this.baseSalary = baseSalary;
-    }
-
-    // Abstract method
-    public abstract double calculateSalary();
-
-    // Concrete method
-    public void displayInfo() {
-        System.out.println("Name: " + name);
-        System.out.println("Salary: " + calculateSalary());
-    }
-}
-
-// Concrete implementation
-public class Developer extends Employee {
-    private double bonus;
-
-    public Developer(String name, double baseSalary, double bonus) {
-        super(name, baseSalary);
-        this.bonus = bonus;
-    }
-
-    @Override
-    public double calculateSalary() {
-        return baseSalary + bonus;
-    }
-}
-```
-
----
-
-## Java Essentials for LLD
 
 ### Interfaces vs Abstract Classes
 
@@ -1132,73 +563,6 @@ public class SafeCounter {
 
 ---
 
-## Collections Framework
-
-### Collection Hierarchy
-```
-Collection
-├── List
-│   ├── ArrayList       // Dynamic array, O(1) access
-│   ├── LinkedList      // Doubly-linked list, O(1) add/remove at ends
-│   └── Vector          // Synchronized ArrayList (legacy)
-├── Set
-│   ├── HashSet         // No order, O(1) operations
-│   ├── LinkedHashSet   // Maintains insertion order
-│   └── TreeSet         // Sorted, O(log n) operations
-└── Queue
-    ├── PriorityQueue   // Heap-based priority queue
-    ├── ArrayDeque      // Resizable array deque
-    └── LinkedList      // Also implements Queue
-
-Map (separate hierarchy)
-├── HashMap             // No order, O(1) operations
-├── LinkedHashMap       // Maintains insertion order
-├── TreeMap             // Sorted by keys, O(log n)
-└── Hashtable          // Synchronized HashMap (legacy)
-```
-
-### Common Operations
-```java
-// List operations
-List<String> list = new ArrayList<>();
-list.add("item");                    // O(1) amortized
-list.add(0, "first");                // O(n)
-list.get(0);                         // O(1)
-list.remove(0);                      // O(n)
-list.contains("item");               // O(n)
-Collections.sort(list);              // O(n log n)
-
-// Set operations
-Set<String> set = new HashSet<>();
-set.add("item");                     // O(1)
-set.remove("item");                  // O(1)
-set.contains("item");                // O(1)
-
-// Map operations
-Map<String, Integer> map = new HashMap<>();
-map.put("key", 1);                   // O(1)
-map.get("key");                      // O(1)
-map.remove("key");                   // O(1)
-map.containsKey("key");              // O(1)
-map.getOrDefault("key", 0);          // O(1)
-map.putIfAbsent("key", 1);           // O(1)
-
-// Queue operations
-Queue<String> queue = new LinkedList<>();
-queue.offer("item");                 // O(1)
-queue.poll();                        // O(1)
-queue.peek();                        // O(1)
-
-// Deque operations
-Deque<String> deque = new ArrayDeque<>();
-deque.addFirst("first");             // O(1)
-deque.addLast("last");               // O(1)
-deque.removeFirst();                 // O(1)
-deque.removeLast();                  // O(1)
-```
-
----
-
 ## Exception Handling
 
 ### Exception Hierarchy
@@ -1383,186 +747,6 @@ try (FileInputStream fis = new FileInputStream("file.txt");
 
 ---
 
-## Common LLD Interview Problems
-
-### 1. Design Parking Lot System
-```java
-// Key classes
-class ParkingLot {
-    private List<Level> levels;
-    private int capacity;
-
-    public Ticket parkVehicle(Vehicle vehicle) { }
-    public void unparkVehicle(Ticket ticket) { }
-    public boolean isFull() { }
-}
-
-class Level {
-    private List<ParkingSpot> spots;
-    private int floor;
-
-    public boolean parkVehicle(Vehicle vehicle) { }
-}
-
-abstract class Vehicle {
-    protected String licensePlate;
-    protected VehicleType type;
-}
-
-class ParkingSpot {
-    private boolean isOccupied;
-    private Vehicle vehicle;
-    private SpotType type;
-}
-```
-
-### 2. Design Library Management System
-```java
-// Key interfaces and classes
-interface Searchable {
-    List<Book> searchByTitle(String title);
-    List<Book> searchByAuthor(String author);
-    List<Book> searchByISBN(String isbn);
-}
-
-class Library implements Searchable {
-    private Map<String, Book> books;
-    private Map<String, Member> members;
-    private Map<String, Loan> activeLoans;
-
-    public void issueBook(String memberId, String bookId) { }
-    public void returnBook(String loanId) { }
-}
-
-class Book {
-    private String isbn;
-    private String title;
-    private List<Author> authors;
-    private BookStatus status;
-}
-
-class Member {
-    private String memberId;
-    private List<Loan> loanHistory;
-    private int booksIssued;
-
-    public boolean canBorrow() {
-        return booksIssued < MAX_BOOKS_ALLOWED;
-    }
-}
-```
-
-### 3. Design ATM System
-```java
-// State Pattern for ATM
-interface ATMState {
-    void insertCard(ATM atm, Card card);
-    void authenticatePin(ATM atm, int pin);
-    void selectOperation(ATM atm, Operation operation);
-    void cashWithdrawal(ATM atm, double amount);
-    void displayBalance(ATM atm);
-    void returnCard(ATM atm);
-}
-
-class IdleState implements ATMState {
-    public void insertCard(ATM atm, Card card) {
-        atm.setCurrentCard(card);
-        atm.changeState(new HasCardState());
-    }
-}
-
-class ATM {
-    private ATMState currentState;
-    private Card currentCard;
-    private CashDispenser cashDispenser;
-
-    public ATM() {
-        currentState = new IdleState();
-    }
-
-    public void changeState(ATMState newState) {
-        this.currentState = newState;
-    }
-}
-```
-
-### 4. Design Elevator System
-```java
-// Strategy Pattern for scheduling
-interface ElevatorScheduler {
-    Elevator selectElevator(Request request, List<Elevator> elevators);
-}
-
-class FCFSScheduler implements ElevatorScheduler {
-    public Elevator selectElevator(Request request, List<Elevator> elevators) {
-        // First Come First Serve logic
-    }
-}
-
-class Elevator {
-    private int currentFloor;
-    private Direction direction;
-    private Queue<Request> requests;
-    private ElevatorState state;
-
-    public void addRequest(Request request) { }
-    public void processRequests() { }
-}
-
-class ElevatorController {
-    private List<Elevator> elevators;
-    private ElevatorScheduler scheduler;
-
-    public void handleRequest(Request request) {
-        Elevator elevator = scheduler.selectElevator(request, elevators);
-        elevator.addRequest(request);
-    }
-}
-```
-
-### 5. Design Online Shopping System
-```java
-// Key components
-class Product {
-    private String productId;
-    private String name;
-    private double price;
-    private int quantity;
-}
-
-class ShoppingCart {
-    private Map<Product, Integer> items;
-
-    public void addItem(Product product, int quantity) { }
-    public void removeItem(Product product) { }
-    public double calculateTotal() { }
-}
-
-class Order {
-    private String orderId;
-    private List<OrderItem> items;
-    private OrderStatus status;
-    private PaymentInfo payment;
-    private ShippingInfo shipping;
-
-    public void placeOrder() { }
-    public void cancelOrder() { }
-}
-
-// Observer Pattern for notifications
-interface OrderObserver {
-    void update(Order order);
-}
-
-class EmailNotification implements OrderObserver {
-    public void update(Order order) {
-        // Send email about order status
-    }
-}
-```
-
----
-
 ## Quick Reference
 
 ### Time Complexities
@@ -1612,3 +796,60 @@ Feel free to contribute by:
 Made with ❤️ for Java developers preparing for LLD interviews.
 
 **Remember**: Good design is not about using all patterns, but knowing when and where to use them appropriately.
+
+---
+
+## Java Tips & Gotchas
+
+### 1. `==` vs `.equals()`
+- **`==`**: Compares object references (memory addresses).
+- **`.equals()`**: Compares object values. Must be properly overridden (e.g., with `hashCode()`).
+
+```java
+String a = new String("hello");
+String b = new String("hello");
+System.out.println(a == b);         // false
+System.out.println(a.equals(b));    // true
+```
+
+### 2. String Concatenation
+- Use `StringBuilder` for concatenating strings in loops for better performance.
+
+```java
+// ❌ Inefficient
+String result = "";
+for (String s : list) {
+    result += s;
+}
+
+// ✅ Efficient
+StringBuilder sb = new StringBuilder();
+for (String s : list) {
+    sb.append(s);
+}
+String result = sb.toString();
+```
+
+### 3. Programming to Interfaces
+- Declare variables with the interface type for flexibility.
+
+```java
+// ❌ Less flexible
+ArrayList<String> list = new ArrayList<>();
+
+// ✅ More flexible
+List<String> list = new ArrayList<>();
+list = new LinkedList<>(); // Can be easily swapped
+```
+
+### 4. `equals()` and `hashCode()` Contract
+- If you override `.equals()`, you **must** override `hashCode()`.
+- Equal objects must have equal hash codes.
+
+### 5. Integer Division
+- Be mindful of integer division, which truncates decimals.
+
+```java
+int result = 5 / 2; // result is 2, not 2.5
+double result = 5.0 / 2; // result is 2.5
+```
